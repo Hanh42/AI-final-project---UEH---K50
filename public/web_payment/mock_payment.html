@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác Nhận Thanh Toán</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome (Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- CSS Tùy chỉnh (dùng chung nền) -->
+    <link rel="stylesheet" href="../css/global.css">
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Panel Thanh Toán -->
+    <div class="glass-panel w-full max-w-sm p-6 text-center">
+        
+        <!-- Trạng thái: Chờ Xác Nhận -->
+        <div id="paymentConfirmSection">
+            <i class="fa-solid fa-shield-halved fa-3x text-blue-300 mb-4"></i>
+            <h1 class="text-2xl font-bold mb-2">Xác Nhận Thanh Toán</h1>
+            <p class="text-white/80 mb-4">Bạn đang thanh toán cho <br><span class="font-semibold text-lg">SMARTMEALAI Canteen</span></p>
+            
+            <!-- Hiển thị số tiền -->
+            <div class="mb-6">
+                <span class="text-sm text-white/70">SỐ TIỀN</span>
+                <p id="paymentAmount" class="text-4xl font-extrabold text-yellow-300">0 VNĐ</p>
+            </div>
+            
+            <button id="btnConfirmPayment" class="w-full bg-green-500 text-white font-semibold py-3 rounded-lg text-lg transition hover:bg-green-600 active:scale-95 flex items-center justify-center">
+                <i class="fa-solid fa-check mr-2"></i>
+                XÁC NHẬN CHUYỂN TIỀN
+            </button>
+            <button id="btnCancelPayment" class="w-full mt-3 text-white/50 text-sm hover:text-white">Hủy</button>
+        </div>
+
+        <!-- Trạng thái: Đang Xử Lý -->
+        <div id="paymentLoadingSection" class="hidden">
+            <i class="fa-solid fa-spinner fa-spin fa-3x text-white/80 mb-4"></i>
+            <h2 class="text-xl font-semibold">Đang xử lý...</h2>
+        </div>
+
+        <!-- Trạng thái: Thành Công -->
+        <div id="paymentSuccessSection" class="hidden">
+            <i class="fa-solid fa-circle-check fa-3x text-green-400 mb-4"></i>
+            <h2 class="text-xl font-semibold">Thanh Toán Thành Công!</h2>
+            <p class="text-white/70">Bạn có thể đóng cửa sổ này.</p>
+        </div>
+    </div>
+
+    <!-- Firebase (Quan trọng) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js" type="module"></script>
+
+    <!-- Logic Thanh Toán (Module) -->
+    <script type="module">
+        // Import hàm cập nhật từ file utils
+        import { updatePaymentState } from '../js/firestore_utils.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Lấy transactionId và amount từ URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const transactionId = urlParams.get('id');
+            const amount = urlParams.get('amount');
+
+            if (!transactionId || !amount) {
+                document.getElementById('paymentConfirmSection').innerHTML = '<p class="text-red-400">Lỗi: URL thanh toán không hợp lệ.</p>';
+                return;
+            }
+
+            // 2. Hiển thị số tiền
+            document.getElementById('paymentAmount').textContent = `${parseFloat(amount).toLocaleString('vi-VN')} VNĐ`;
+
+            // 3. Gán sự kiện cho nút "Xác nhận"
+            document.getElementById('btnConfirmPayment').addEventListener('click', async () => {
+                // Hiển thị loading
+                document.getElementById('paymentConfirmSection').classList.add('hidden');
+                document.getElementById('paymentLoadingSection').classList.remove('hidden');
+
+                // Gọi hàm cập nhật Firestore
+                await updatePaymentState(transactionId);
+                
+                // Hiển thị thành công
+                document.getElementById('paymentLoadingSection').classList.add('hidden');
+                document.getElementById('paymentSuccessSection').classList.remove('hidden');
+            });
+
+            // 4. Nút Hủy (đóng tab)
+            document.getElementById('btnCancelPayment').addEventListener('click', () => {
+                // Đóng tab (hoạt động tốt nhất nếu tab được mở bằng JavaScript)
+                window.close();
+            });
+        });
+    </script>
+</body>
+</html>
