@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN (Cho biểu đồ) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome (Cho icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-lg">
+            <h1 class="text-3xl font-bold text-gray-800">📊 Admin Dashboard</h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-gray-600">Chào, <span class="font-semibold">Admin</span></span>
+                <button onclick="localStorage.clear(); window.location.href='../web_login/login.html'" class="text-sm text-red-500 hover:text-red-700 transition flex items-center">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Đăng Xuất
+                </button>
+            </div>
+        </header>
+
+        <!-- Thống kê nhanh -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-green-500 transition hover:shadow-xl">
+                <p class="text-sm font-medium text-gray-500">Tổng Thu Nhập (Hôm Nay)</p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">15,500,000 <span class="text-sm font-normal text-green-500">+12%</span></p>
+                <p class="text-xs text-gray-400 mt-2">Sau thuế (Est.): 14,260,000</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-indigo-500 transition hover:shadow-xl">
+                <p class="text-sm font-medium text-gray-500">Số Đơn Hàng</p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">325 <span class="text-sm font-normal text-indigo-500">+5%</span></p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-yellow-500 transition hover:shadow-xl">
+                <p class="text-sm font-medium text-gray-500">Voucher Đã Dùng</p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">45</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 transition hover:shadow-xl">
+                <p class="text-sm font-medium text-gray-500">Khách Hàng VIP</p>
+                <p class="text-3xl font-extrabold text-gray-900 mt-1">82</p>
+            </div>
+        </div>
+
+        <!-- Biểu đồ -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Biểu đồ Doanh thu -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Phân Tích Doanh Thu (7 Ngày Gần Nhất)</h2>
+                <canvas id="revenueChart"></canvas>
+            </div>
+            <!-- Đánh giá khách hàng -->
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Đánh Giá Khách Hàng</h2>
+                <div class="text-center mb-4">
+                    <p class="text-5xl font-bold text-yellow-500">4.8 <span class="text-lg text-gray-400">/ 5</span></p>
+                    <p class="text-sm text-gray-500">(Dựa trên 152 đánh giá)</p>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center">
+                        <span class="text-gray-600">5 sao</span>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mx-2">
+                            <div class="bg-green-500 h-2.5 rounded-full" style="width: 90%"></div>
+                        </div>
+                        <span class="text-gray-600">90%</span>
+                    </div>
+                     <div class="flex items-center">
+                        <span class="text-gray-600">4 sao</span>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mx-2">
+                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 8%"></div>
+                        </div>
+                        <span class="text-gray-600">8%</span>
+                    </div>
+                     <div class="flex items-center">
+                        <span class="text-gray-600">3 sao</span>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mx-2">
+                            <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 2%"></div>
+                        </div>
+                        <span class="text-gray-600">2%</span>
+                    </div>
+                    <!-- Các mức sao khác -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Liên hệ và Hỗ trợ -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Liên Hệ Nhà Phát Triển</h2>
+            <p class="text-gray-600">Gặp sự cố hoặc cần nâng cấp? Liên hệ đội ngũ phát triển SmartMealAI:</p>
+            <ul class="mt-4 space-y-2 text-sm">
+                <li><i class="fa-solid fa-user mr-2 text-indigo-500"></i>Nguyễn Trọng Phúc</li>
+                <li><i class="fa-solid fa-user mr-2 text-indigo-500"></i>Nguyễn Thùy Hạnh</li>
+                <li><i class="fa-solid fa-user mr-2 text-indigo-500"></i>Nguyễn Tiến Hiếu</li>
+                <li><i class="fa-solid fa-envelope mr-2 text-indigo-500"></i>support@smartmeal.ueh</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Script cho Biểu đồ Doanh thu
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                    datasets: [{
+                        label: 'Doanh thu (Triệu VNĐ)',
+                        data: [12, 19, 15, 20, 18, 22, 15.5],
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

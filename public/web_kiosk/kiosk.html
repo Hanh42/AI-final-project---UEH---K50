@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMealAI Kiosk</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome (Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- Tệp CSS tùy chỉnh (Phải đặt sau Tailwind) -->
+    <link rel="stylesheet" href="../css/global.css">
+</head>
+<body class="min-h-screen overflow-hidden p-4 md:p-8">
+
+    <!-- Thanh Taskbar Trên Cùng -->
+    <nav class="glass-panel w-full p-3 px-6 flex justify-between items-center fixed top-4 left-4 right-4 mx-auto max-w-[98%] z-50">
+        <!-- Trái: Điều hướng -->
+        <div class="flex items-center space-x-6">
+            <a href="#" class="flex items-center text-white/90 hover:text-white transition" title="Trang Chủ">
+                <i class="fa-solid fa-house fa-lg"></i>
+            </a>
+            <button id="btnAboutUs" class="flex items-center text-white/90 hover:text-white transition" title="Về chúng tôi">
+                <i class="fa-solid fa-book fa-lg"></i>
+            </button>
+        </div>
+        
+        <!-- Phải: Người dùng -->
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center text-white/90" title="Trạng thái khách hàng">
+                <span id="userIcon" class="mr-2">
+                    <!-- Icon sẽ được JS chèn vào -->
+                </span>
+                <span id="userDisplay" class="font-semibold">Đang tải...</span>
+            </div>
+            <button id="btnLogout" class="flex items-center text-red-300 hover:text-red-200 transition" title="Đăng xuất">
+                <i class="fa-solid fa-right-from-bracket fa-lg"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Nội dung chính (Camera và Kết quả) -->
+    <main class="w-full h-[calc(100vh-160px)] mt-[70px] flex flex-col md:flex-row gap-6">
+        
+        <!-- Cột Trái: Camera & Điều khiển -->
+        <div class="w-full md:w-3/5 h-full flex flex-col gap-4">
+            <!-- Khung Camera -->
+            <div class="glass-panel w-full h-[calc(100%-80px)] p-3 relative overflow-hidden flex items-center justify-center">
+                <!-- Video Feed -->
+                <video id="cameraFeed" class="w-full h-full object-cover rounded-lg" autoplay playsinline muted></video>
+                
+                <!-- Image Preview (cho chế độ Photo) -->
+                <img id="imagePreview" src="https://placehold.co/640x480/png?text=Ch%E1%BB%8Dn+%E1%BA%A3nh" class="w-full h-full object-cover rounded-lg hidden" alt="Image Preview"/>
+                
+                <!-- Spinner khi tải camera -->
+                <div id="cameraSpinner" class="absolute inset-0 flex items-center justify-center bg-black/30 text-white z-10">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+                    <span class="ml-2">Đang tải Camera...</span>
+                </div>
+            </div>
+            
+            <!-- Nút Chuyển Chế Độ & Chụp -->
+            <div id="mainControls" class="glass-panel w-full h-[80px] p-3 flex justify-between items-center">
+                <!-- Chuyển chế độ -->
+                <div class="flex bg-black/20 rounded-xl p-1">
+                    <button id="btnCameraMode" class="glass-button glass-button-active px-6 py-2 rounded-lg flex items-center gap-2">
+                        <i class="fa-solid fa-camera"></i> CAMERA
+                    </button>
+                    <button id="btnPhotoMode" class="glass-button px-6 py-2 rounded-lg flex items-center gap-2">
+                        <i class="fa-solid fa-image"></i> PHOTO
+                    </button>
+                </div>
+
+                <!-- Nút Hành Động -->
+                <div id="cameraActions" class="">
+                    <button id="btnSnapshot" class="px-6 py-4 bg-red-500 rounded-xl flex items-center gap-2 text-white font-semibold transition hover:bg-red-600 active:scale-95">
+                        <i class="fa-solid fa-camera"></i> CHỤP ẢNH & TÍNH TIỀN
+                    </button>
+                </div>
+                <div id="photoActions" class="hidden relative">
+                    <input type="file" id="fileUpload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*">
+                    <button id="btnUpload" class="px-6 py-4 bg-indigo-500 rounded-xl flex items-center gap-2 text-white font-semibold transition hover:bg-indigo-600">
+                        <i class="fa-solid fa-upload"></i> TẢI ẢNH & TÍNH TIỀN
+                    </button>
+                </div>
+            </div>
+
+            <!-- Nút Reset (chỉ hiện sau khi thành công) -->
+            <button id="btnReset" class="hidden glass-panel w-full h-[80px] p-3 flex justify-center items-center text-xl font-semibold bg-indigo-500 hover:bg-indigo-600 transition">
+                <i class="fa-solid fa-arrow-rotate-right mr-2"></i>Phục Vụ Khách Tiếp Theo
+            </button>
+
+        </div>
+
+        <!-- Cột Phải: Kết quả & Thanh toán -->
+        <div class="w-full md:w-2/5 h-full glass-panel p-5 flex flex-col relative overflow-hidden">
+            
+            <!-- Trạng thái: Chờ -->
+            <div id="predictionWaiting" class="flex flex-col items-center justify-center h-full text-center">
+                <i class="fa-solid fa-camera-viewfinder fa-4x text-white/50 mb-4"></i>
+                <h2 class="text-2xl font-semibold mb-2">Chờ Quét Khay Cơm</h2>
+                <p class="text-white/60">Sử dụng CAMERA hoặc PHOTO để bắt đầu</p>
+            </div>
+
+            <!-- Trạng thái: Đang Tải (Loading) -->
+            <div id="predictionLoading" class="hidden flex-col items-center justify-center h-full text-center">
+                <i class="fa-solid fa-microchip fa-spin fa-4x text-white/80 mb-4"></i>
+                <h2 class="text-2xl font-semibold mb-2">AI Đang Phân Tích...</h2>
+                <p class="text-white/60">Quá trình này mất vài giây. Vui lòng chờ.</p>
+                <!-- Debug: Hiển thị 5 ảnh đã cắt -->
+                <div id="segmentationResults" class="flex gap-2 mt-4 p-2 bg-black/20 rounded-lg"></div>
+            </div>
+
+            <!-- Trạng thái: Kết Quả -->
+            <div id="predictionResults" class="hidden h-full flex-col">
+                <h2 class="text-2xl font-bold mb-3 text-center">Chi Tiết Hóa Đơn</h2>
+                <!-- Danh sách món ăn -->
+                <div class="flex-grow overflow-y-auto results-scroll pr-2">
+                    <ul id="predictionResultsList" class="space-y-3">
+                        <!-- JS sẽ chèn kết quả vào đây -->
+                    </ul>
+                </div>
+                
+                <!-- Phân tích dinh dưỡng -->
+                <div class="mt-4 pt-4 border-t border-white/20">
+                    <h3 class="font-semibold text-lg mb-2">Phân Tích Dinh Dưỡng (Tổng)</h3>
+                    <div class="grid grid-cols-4 gap-2 text-center text-sm">
+                        <div class="bg-white/10 p-2 rounded-lg"><span id="totalCalories" class="font-bold block text-lg">0</span> Calo</div>
+                        <div class="bg-white/10 p-2 rounded-lg"><span id="totalProtein" class="font-bold block text-lg">0g</span> Đạm</div>
+                        <div class="bg-white/10 p-2 rounded-lg"><span id="totalFat" class="font-bold block text-lg">0g</span> Béo</div>
+                        <div class="bg-white/10 p-2 rounded-lg"><span id="totalCarbs" class="font-bold block text-lg">0g</span> Carb</div>
+                    </div>
+                    <p id="nutritionRecommendation" class="text-xs text-center text-white/70 italic mt-2">Khuyến nghị dinh dưỡng...</p>
+                </div>
+                
+                <!-- Khu vực Voucher (Chỉ cho VIP) -->
+                <div id="voucherSection" class="hidden mt-4 pt-4 border-t border-white/20">
+                    <h3 class="font-semibold text-lg mb-2 text-yellow-400">🎁 Ưu Đãi VIP</h3>
+                    <div class="flex justify-around">
+                        <button class="voucher-btn glass-button px-4 py-2" data-discount="0.10">Giảm 10%</button>
+                        <button class="voucher-btn glass-button px-4 py-2" data-discount="0.20">Giảm 20%</button>
+                        <button class="voucher-btn glass-button px-4 py-2" data-discount="0.30">Giảm 30%</button>
+                    </div>
+                </div>
+
+                <!-- Tổng tiền -->
+                <div class="mt-4 pt-4 border-t border-white/20 flex justify-between items-center">
+                    <span class="text-xl font-medium">TỔNG TIỀN</span>
+                    <span id="finalPrice" data-original-price="0" class="text-3xl font-bold text-yellow-300">0 VNĐ</span>
+                </div>
+                
+                <!-- QR Code Thanh toán -->
+                <div id="qrCodeContainer" class="hidden text-center mt-4">
+                    <h3 class="font-semibold text-lg">THANH TOÁN</h3>
+                    <p class="text-sm text-white/70 mb-2">Quét mã để thanh toán</p>
+                    <canvas id="qrCodeCanvas" class="mx-auto bg-white p-2 rounded-lg"></canvas>
+                </div>
+            </div>
+            
+            <!-- Trạng thái: Thành công -->
+            <div id="paymentSuccess" class="hidden flex-col items-center justify-center h-full text-center">
+                <i class="fa-solid fa-circle-check fa-4x text-green-400 mb-4"></i>
+                <h2 class="text-2xl font-semibold mb-2">Thanh Toán Thành Công!</h2>
+                <p class="text-white/60">Cảm ơn quý khách. Chúc quý khách ngon miệng!</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Thanh Taskbar Dưới Cùng -->
+    <footer class="glass-panel w-full p-3 px-6 flex justify-around items-center fixed bottom-4 left-4 right-4 mx-auto max-w-[98%] z-50">
+        <button class="flex flex-col items-center text-white/90 hover:text-white transition" title="Menu">
+            <i class="fa-solid fa-book-open"></i>
+            <span class="text-xs mt-1">Menu</span>
+        </button>
+        <button class="flex flex-col items-center text-white/90 hover:text-white transition" title="Liên hệ">
+            <i class="fa-solid fa-phone"></i>
+            <span class="text-xs mt-1">Liên hệ</span>
+        </button>
+        <button class="flex flex-col items-center text-white/90 hover:text-white transition" title="Chatbot AI">
+            <i class="fa-solid fa-comments"></i>
+            <span class="text-xs mt-1">Chatbot AI</span>
+        </button>
+        <!-- Nút TTS (Hỗ trợ khiếm thị) -->
+        <button id="btnTTS" class="flex flex-col items-center text-white/90 hover:text-white transition" title="Đọc Giọng Nói (Hỗ trợ khiếm thị)">
+            <i class="fa-solid fa-volume-high"></i>
+            <span class="text-xs mt-1">Giọng Nói</span>
+        </button>
+    </footer>
+
+    <!-- Modal "Về Chúng Tôi" -->
+    <div id="aboutUsModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-backdrop">
+        <div class="glass-panel max-w-2xl w-full max-h-[80vh] p-6 rounded-2xl relative">
+            <button id="btnCloseModal" class="absolute top-4 right-4 text-white/50 hover:text-white transition">
+                <i class="fa-solid fa-xmark fa-2x"></i>
+            </button>
+            <h2 class="text-2xl font-bold text-center mb-4">🏫 LỊCH SỬ PHÁT TRIỂN ỨNG DỤNG SMARTCANTEEN</h2>
+            <div class="overflow-y-auto max-h-[calc(80vh-100px)] pr-2 space-y-3 text-white/90 results-scroll">
+                <p><strong>Giới thiệu chung:</strong> SMARTCANTEEN là một ứng dụng trí tuệ nhân tạo được phát triển với mục tiêu nâng cao trải nghiệm ăn uống tại căng tin trường học và doanh nghiệp. Ứng dụng tích hợp công nghệ nhận diện hình ảnh (AI – CNN), xử lý giọng nói, và thanh toán tự động nhằm mang lại quy trình phục vụ nhanh chóng, minh bạch và thân thiện với mọi đối tượng người dùng – đặc biệt là người khiếm thị.</p>
+                <p><strong>Nguồn gốc và ý tưởng:</strong> Ý tưởng về SMARTCANTEEN được khởi nguồn vào đầu năm 2025 từ một nhóm sinh viên ngành Điều khiển thông minh và tự động hóa thuộc  Đại học Kinh tế TP. Hồ Chí Minh (UEH). Nhóm nhận thấy rằng trong thực tế, việc quản lý, nhận diện món ăn và thanh toán trong căng tin truyền thống thường mất nhiều thời gian, dễ sai sót và chưa hỗ trợ tốt cho các nhóm người dùng đặc biệt. Từ đó, nhóm đã đặt mục tiêu: “Tạo ra một hệ thống thông minh có thể tự động nhận diện món ăn, tính tiền, cung cấp thông tin dinh dưỡng, và hỗ trợ thanh toán nhanh – tất cả chỉ trong vài giây.”</p>
+                <p><strong>Quá trình phát triển:</strong><br>
+                    🔹 Tháng 1/2025: Khởi động dự án – nghiên cứu công nghệ thị giác máy tính (Computer Vision) và mạng nơ-ron tích chập (CNN).<br>
+                    🔹 Tháng 3/2025: Thu thập dữ liệu hình ảnh thực tế từ căng tin sinh viên UEH; xây dựng bộ dữ liệu gồm hơn 3.000 ảnh của các món ăn phổ biến.<br>
+                    🔹 Tháng 4/2025: Huấn luyện mô hình CNN (TensorFlow/Keras) đạt độ chính xác trên 95% trong việc nhận diện món ăn.<br>
+                    🔹 Tháng 6/2025: Xây dựng giao diện web bằng Flask – tích hợp camera, QR code, và hệ thống đọc giọng nói hỗ trợ người khiếm thị.<br>
+                    🔹 Tháng 8/2025: Hoàn thiện phiên bản thử nghiệm nội bộ (SmartCanteen v1.0) và triển khai tại một số khu căng tin sinh viên UEH.<br>
+                    🔹 Tháng 10/2025: Ra mắt phiên bản trình diễn chính thức, được đánh giá cao bởi giảng viên và sinh viên nhờ tính thực tế và khả năng ứng dụng cao.
+                </p>
+                <p><strong>Đội ngũ phát triển:</strong> SMARTCANTEEN được phát triển bởi nhóm sinh viên UEH:<br>
+                    - Nguyễn Trọng Phúc<br>
+                    - Nguyễn Thùy Hạnh<br>
+                    - Nguyễn Tiến Hiếu
+                </p>
+                <p><strong>Công nghệ sử dụng:</strong><br>
+                    - Ngôn ngữ: Python, HTML, CSS, JavaScript<br>
+                    - Framework: Flask (Backend), Bootstrap / Tailwind (Frontend)<br>
+                    - AI Model: Convolutional Neural Network (CNN – TensorFlow/Keras)<br>
+                    - Cơ sở dữ liệu: SQLite / CSV<br>
+                    - Công cụ hỗ trợ: OpenCV, Pyttsx3, Qrcode, Pandas
+                </p>
+                 <p><strong>Mục tiêu tương lai:</strong><br>
+                    - Mở rộng mô hình sang nhận diện món ăn Việt trên toàn quốc.<br>
+                    - Tích hợp hệ thống dinh dưỡng cá nhân hóa, đưa ra gợi ý thực đơn theo nhu cầu calo của từng người dùng.<br>
+                    - Xây dựng ứng dụng di động (Android/iOS) cho trải nghiệm tiện lợi hơn.<br>
+                    - Kết nối với các hệ thống quản lý tài chính và thẻ sinh viên UEH để thanh toán tự động.
+                </p>
+                <p><strong>Tầm nhìn:</strong> SMARTCANTEEN hướng tới trở thành hệ thống căng tin thông minh toàn diện, góp phần hiện đại hóa dịch vụ ăn uống học đường, mang lại trải nghiệm nhanh – sạch – an toàn – minh bạch, đồng thời thể hiện khả năng ứng dụng thực tế của AI trong đời sống hàng ngày.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Nội dung TTS (Ẩn) -->
+    <div id="tts-content" class="hidden">Chưa có thông tin</div>
+
+    <!-- CÁC THƯ VIỆN JS (Quan trọng!) -->
+    <!-- Firebase (Cần cho cả Kiosk và Payment) -->
+    <!-- Sử dụng SDK v9 (module) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js" type="module"></script>
+    
+    <!-- Thư viện tạo QR Code -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+    <!-- Logic chính của Kiosk (Module) -->
+    <script src="../js/camera.js" type="module"></script>
+</body>
+</html>
