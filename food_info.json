@@ -1,0 +1,134 @@
+{
+  "com_trang": {
+    "name": "Cơm trắng",
+    "price": 2000,
+    "nutrition": {
+      "calories": 200,
+      "protein": 4.0,
+      "fat": 0.4,
+      "carbs": 45.0,
+      "description": "Cung cấp tinh bột",
+      "ingredients": "Gạo trắng"
+    }
+  },
+  "ca_hu_kho": {
+    "name": "Cá hú kho",
+    "price": 15000,
+    "nutrition": {
+      "calories": 250,
+      "protein": 35.0,
+      "fat": 8.0,
+      "carbs": 5.0,
+      "description": "Giàu protein, ít béo",
+      "ingredients": "Cá hú, nước mắm, tiêu, hành, ớt"
+    }
+  },
+  "canh_chua_ca": {
+    "name": "Canh chua có cá",
+    "price": 10000,
+    "nutrition": {
+      "calories": 180,
+      "protein": 20.0,
+      "fat": 5.0,
+      "carbs": 12.0,
+      "description": "Bổ sung vitamin C, đạm từ cá",
+      "ingredients": "Cá basa, cà chua, thơm, bạc hà, me"
+    }
+  },
+  "canh_chua_khong_ca": {
+    "name": "Canh chua không cá",
+    "price": 7000,
+    "nutrition": {
+      "calories": 120,
+      "protein": 3.0,
+      "fat": 2.0,
+      "carbs": 15.0,
+      "description": "Nhiều chất xơ, vitamin C",
+      "ingredients": "Cà chua, thơm, đậu bắp, bạc hà"
+    }
+  },
+  "canh_rau": {
+    "name": "Canh rau",
+    "price": 5000,
+    "nutrition": {
+      "calories": 90,
+      "protein": 2.0,
+      "fat": 1.0,
+      "carbs": 10.0,
+      "description": "Thanh lọc cơ thể, ít calo",
+      "ingredients": "Rau cải, hành lá, gia vị"
+    }
+  },
+  "dau_hu_sot_ca": {
+    "name": "Đậu hũ sốt cà",
+    "price": 10000,
+    "nutrition": {
+      "calories": 160,
+      "protein": 10.0,
+      "fat": 8.0,
+      "carbs": 12.0,
+      "description": "Cung cấp đạm thực vật, ít cholesterol",
+      "ingredients": "Đậu hũ, cà chua, hành, dầu ăn"
+    }
+  },
+  "rau_xao": {
+    "name": "Rau xào",
+    "price": 5000,
+    "nutrition": {
+      "calories": 100,
+      "protein": 3.0,
+      "fat": 5.0,
+      "carbs": 8.0,
+      "description": "Giàu chất xơ, vitamin A",
+      "ingredients": "Cải ngọt, cà rốt, dầu ăn, tỏi"
+    }
+  },
+  "suon_nuong": {
+    "name": "Sườn nướng",
+    "price": 15000,
+    "nutrition": {
+      "calories": 320,
+      "protein": 40.0,
+      "fat": 15.0,
+      "carbs": 10.0,
+      "description": "Giàu protein, chất béo",
+      "ingredients": "Sườn heo, nước mắm, tỏi, tiêu"
+    }
+  },
+  "thit_kho": {
+    "name": "Thịt kho",
+    "price": 10000,
+    "nutrition": {
+      "calories": 300,
+      "protein": 25.0,
+      "fat": 20.0,
+      "carbs": 3.0,
+      "description": "Giàu năng lượng, chất béo",
+      "ingredients": "Thịt heo ba chỉ, nước mắm, tiêu"
+    }
+  },
+  "thit_kho_trung": {
+    "name": "Thịt kho trứng",
+    "price": 15000,
+    "nutrition": {
+      "calories": 350,
+      "protein": 30.0,
+      "fat": 22.0,
+      "carbs": 5.0,
+      "description": "Giàu protein, chất béo",
+      "ingredients": "Thịt heo, trứng gà, nước dừa, nước mắm"
+    }
+  },
+  "trung_chien": {
+    "name": "Trứng chiên",
+    "price": 7000,
+    "nutrition": {
+      "calories": 220,
+      "protein": 15.0,
+      "fat": 18.0,
+      "carbs": 2.0,
+      "description": "Giàu protein, vitamin D",
+      "ingredients": "Trứng gà, dầu ăn, hành lá"
+    }
+  }
+}
